@@ -627,47 +627,61 @@
   };
   // ─────────────────────────────────────────────
 
+  // todayKey duplicated here so the module is fully self-contained
+  // (ES modules run after regular scripts so we cannot call window functions
+  //  at module top-level without risking a ReferenceError that silently
+  //  aborts the entire try block before onSnapshot is ever registered)
+  function moduleTodayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
   let todayEntries = [];
 
-  try {
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
-    setFbStatus('connected', 'Live');
+  // Use a small init function called via window.addEventListener('load')
+  // so that all regular-script functions (setFbStatus, updateStats, etc.)
+  // are guaranteed to exist before we touch them.
+  window.addEventListener('load', async () => {
+    try {
+      const app = initializeApp(firebaseConfig);
+      const db  = getFirestore(app);
 
-    // No orderBy — that combination with where() requires a composite index
-    // which can silently expire. Filter by dateKey only and sort client-side.
-    const todayQ = query(
-      collection(db, 'entries'),
-      where('dateKey', '==', todayKey())
-    );
+      // Expose write helpers immediately after db is ready
+      window._getTodayEntries = () => todayEntries;
+      window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
+      window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
+      window._getAllEntries = async () => {
+        const snap = await getDocs(collection(db, 'entries'));
+        return snap.docs
+          .map(d => ({ firestoreId: d.id, ...d.data() }))
+          .sort((a, b) => b.timestamp - a.timestamp);
+      };
 
-    onSnapshot(todayQ, snap => {
-      todayEntries = snap.docs
-        .map(d => ({ firestoreId: d.id, ...d.data() }))
-        .sort((a, b) => b.timestamp - a.timestamp);
-      document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
-      updateStats();
-      renderTable();
-      renderOnsiteList();
-    }, err => {
-      console.error('Firestore listener error:', err);
-      setFbStatus('error', 'Error — check console');
-    });
+      // Single-field where() — no composite index needed
+      const todayQ = query(
+        collection(db, 'entries'),
+        where('dateKey', '==', moduleTodayKey())
+      );
 
-    window._getTodayEntries = () => todayEntries;
-    window._getAllEntries = async () => {
-      const snap = await getDocs(collection(db, 'entries'));
-      return snap.docs
-        .map(d => ({ firestoreId: d.id, ...d.data() }))
-        .sort((a, b) => b.timestamp - a.timestamp);
-    };
-    window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
-    window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
+      onSnapshot(todayQ, snap => {
+        todayEntries = snap.docs
+          .map(d => ({ firestoreId: d.id, ...d.data() }))
+          .sort((a, b) => b.timestamp - a.timestamp);
+        document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
+        updateStats();
+        renderTable();
+        renderOnsiteList();
+        setFbStatus('connected', 'Live');
+      }, err => {
+        console.error('Firestore listener error:', err);
+        setFbStatus('error', 'Error — check console');
+      });
 
-  } catch(e) {
-    console.error('Firebase init failed:', e);
-    setFbStatus('error', 'Offline');
-  }
+    } catch(e) {
+      console.error('Firebase init failed:', e);
+      setFbStatus('error', 'Offline');
+    }
+  });
 </script>
 
 <script>
