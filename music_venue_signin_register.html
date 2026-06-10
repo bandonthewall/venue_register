@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Venue Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Tokens ── */
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+      /* Light-mode palette */
+      --bg-primary:    #ffffff;
+      --bg-secondary:  #f8f7ff;
+      --bg-tertiary:   #f1f0f7;
+      --bg-danger:     #fff1f1;
+
+      --border-secondary: #e2e0f0;
+      --border-tertiary:  #ece9fa;
+
+      --text-primary:   #1a1635;
+      --text-secondary: #6b6890;
+      --text-danger:    #e24b4a;
+
+      --accent:        #c084fc;
+      --accent-dark:   #7c3aed;
+      --accent-bg:     #f5f0ff;
+      --accent-tab-bg: #ede9fe;
+    }
+
+    /* ── Base ── */
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── App shell ── */
+    .app-wrap { position: relative; min-height: 100vh; }
+    .app      { min-height: 100vh; background: var(--bg-tertiary); }
+
+    /* ── Header ── */
+    .header {
+      background: #1a1a2e;
+      padding: 20px 32px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .venue-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .venue-icon i { font-size: 22px; color: var(--accent); }
+    .header-title { color: #fff; font-size: 18px; font-weight: 500; letter-spacing: 0.01em; }
+    .header-sub   { color: rgba(255,255,255,0.45); font-size: 13px; margin-top: 2px; }
+    .header-right { display: flex; gap: 10px; flex-shrink: 0; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 16px; border-radius: 8px; font-size: 14px;
+      font-weight: 500; cursor: pointer; border: none;
+      font-family: var(--font-sans);
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+
+    .btn-ghost  { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-export { background: var(--accent); color: #fff; }
+
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      font-size: 15px; padding: 12px 28px;
+      width: 100%; justify-content: center;
+      margin-top: 4px; border-radius: 10px;
+      font-family: var(--font-sans);
+    }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-danger {
+      background: transparent;
+      border: 0.5px solid var(--border-tertiary);
+      color: var(--text-danger);
+      padding: 7px 12px; border-radius: 6px;
+      font-size: 13px; cursor: pointer;
+      font-family: var(--font-sans);
+      transition: background 0.15s;
+    }
+    .btn-danger:hover { background: var(--bg-danger); }
+
+    .btn-secondary {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-secondary);
+      color: var(--text-primary);
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: var(--bg-primary);
+      border-bottom: 0.5px solid var(--border-tertiary);
+      padding: 0 32px;
+    }
+    .tab {
+      padding: 14px 20px; font-size: 14px; font-weight: 500;
+      color: var(--text-secondary); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+      transition: color 0.15s;
+      user-select: none;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--bg-secondary); color: var(--text-secondary);
+      border-radius: 10px; font-size: 11px; padding: 1px 7px; margin-left: 6px;
+    }
+    .tab.active .tab-count { background: var(--accent-tab-bg); color: var(--accent-dark); }
+
+    /* ── Content ── */
+    .content { padding: 28px 32px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Form ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+    .form-full  { grid-column: 1 / -1; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field label {
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      letter-spacing: 0.02em; text-transform: uppercase;
+    }
+    .field input,
+    .field select {
+      padding: 13px 14px; border-radius: 9px; font-size: 15px;
+      border: 0.5px solid var(--border-secondary);
+      background: var(--bg-primary); color: var(--text-primary);
+      font-family: var(--font-sans); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(192,132,252,0.15);
+    }
+
+    .select-wrap { position: relative; }
+    .select-wrap i {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-secondary); font-size: 18px;
+    }
+
+    /* ── Visit chips ── */
+    .visit-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .visit-chip {
+      padding: 11px 10px; border-radius: 9px; text-align: center;
+      border: 0.5px solid var(--border-tertiary);
+      background: var(--bg-secondary);
+      color: var(--text-secondary); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+      user-select: none;
+    }
+    .visit-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .visit-chip.selected { border-color: var(--accent); background: var(--accent-bg); color: var(--accent-dark); }
+    .visit-chip i { display: block; font-size: 20px; margin-bottom: 5px; }
+
+    /* ── Misc layout ── */
+    .divider { height: 0.5px; background: var(--border-tertiary); margin: 24px 0; }
+    .section-title {
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;
+    }
+
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-tertiary);
+      border-radius: 10px; padding: 16px 18px;
+    }
+    .stat-label {
+      font-size: 12px; color: var(--text-secondary); font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+    }
+    .stat-num { font-size: 26px; font-weight: 500; color: var(--text-primary); }
+
+    /* ── Filter ── */
+    .filter-row { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+    .filter-row input {
+      flex: 1; padding: 10px 14px; border-radius: 8px; font-size: 14px;
+      border: 0.5px solid var(--border-secondary);
+      background: var(--bg-primary); color: var(--text-primary);
+      font-family: var(--font-sans); outline: none;
+      transition: border-color 0.15s;
+    }
+    .filter-row input:focus { border-color: var(--accent); }
+
+    /* ── Table ── */
+    .register-table { width: 100%; border-collapse: collapse; }
+    .register-table thead tr { border-bottom: 0.5px solid var(--border-secondary); }
+    .register-table th {
+      text-align: left; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 10px 12px;
+    }
+    .register-table tbody tr {
+      border-bottom: 0.5px solid var(--border-tertiary);
+      transition: background 0.1s;
+    }
+    .register-table tbody tr:hover { background: var(--bg-secondary); }
+    .register-table td { padding: 13px 12px; font-size: 14px; color: var(--text-primary); vertical-align: middle; }
+    .register-table td.muted { color: var(--text-secondary); font-size: 13px; }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge-in  { background: #d1fae5; color: #065f46; }
+    .badge-out { background: #fee2e2; color: #991b1b; }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+    .empty-state i { font-size: 40px; color: var(--border-tertiary); display: block; margin-bottom: 12px; }
+
+    /* ── Toast ── */
+    .success-toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: #065f46; color: #fff; padding: 12px 22px; border-radius: 10px;
+      font-size: 14px; font-weight: 500; display: none; z-index: 999;
+      white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      align-items: center; gap: 8px;
+    }
+
+    /* ── End-of-day modal ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(20,16,40,0.55);
+      backdrop-filter: blur(3px); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-backdrop.visible { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--bg-primary); border-radius: 16px;
+      padding: 32px; max-width: 440px; width: calc(100% - 40px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      transform: translateY(12px); transition: transform 0.2s;
+    }
+    .modal-backdrop.visible .modal { transform: translateY(0); }
+    .modal-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: #fef3c7; display: flex; align-items: center;
+      justify-content: center; margin-bottom: 18px;
+    }
+    .modal-icon i { font-size: 26px; color: #d97706; }
+    .modal h2 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+    .modal p  { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 6px; }
+    .modal-stats {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+      margin: 18px 0;
+    }
+    .modal-stat {
+      background: var(--bg-secondary); border-radius: 10px;
+      padding: 12px; text-align: center;
+    }
+    .modal-stat-num  { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+    .modal-stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+    .modal-email-row { display: flex; gap: 8px; margin: 16px 0 20px; }
+    .modal-email-row input {
+      flex: 1; padding: 11px 13px; border-radius: 8px; font-size: 14px;
+      border: 0.5px solid var(--border-secondary);
+      background: var(--bg-primary); color: var(--text-primary);
+      font-family: var(--font-sans); outline: none;
+      transition: border-color 0.15s;
+    }
+    .modal-email-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(192,132,252,0.15); }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+    .btn-amber { background: #d97706; color: #fff; }
+    .btn-amber:hover { opacity: 0.88; }
+    .modal-snooze { font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .modal-snooze:hover { color: var(--text-primary); }
+
+    /* ── EOD settings row in header ── */
+    .eod-time-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);
+      border: 0.5px solid rgba(255,255,255,0.12);
+      border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .eod-time-pill:hover { background: rgba(255,255,255,0.14); color: #fff; }
+    .eod-time-pill i { font-size: 14px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .header { padding: 16px 20px; }
+      .content { padding: 20px; }
+      .tabs { padding: 0 20px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: 1; }
+      .visit-type-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-row { grid-template-columns: 1fr; }
+      .filter-row { flex-direction: column; }
+      .filter-row input { width: 100%; }
+      .register-table { font-size: 13px; }
+      .register-table th:nth-child(2),
+      .register-table td:nth-child(2),
+      .register-table th:nth-child(4),
+      .register-table td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="success-toast" id="toast">
+  <i class="ti ti-check" aria-hidden="true"></i>
+  <span id="toast-msg">Signed in successfully</span>
+</div>
+
+<div class="app-wrap">
+<div class="app">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="venue-icon"><i class="ti ti-music" aria-hidden="true"></i></div>
+      <div>
+        <div class="header-title">Venue Register</div>
+        <div class="header-sub" id="live-date"></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-ghost" id="eod-pill" onclick="openEodSettings()" title="End-of-day export time">
+        <i class="ti ti-clock" aria-hidden="true"></i>
+        <span id="eod-pill-label">EOD: 11:00 pm</span>
+      </button>
+      <button class="btn btn-ghost" onclick="exportCSV()">
+        <i class="ti ti-download" aria-hidden="true"></i> Export CSV
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('signin')" id="tab-signin">
+      <i class="ti ti-login" aria-hidden="true" style="margin-right:6px;font-size:15px;vertical-align:-2px"></i>Sign in/out
+    </div>
+    <div class="tab" onclick="switchTab('register')" id="tab-register">
+      Register <span class="tab-count" id="reg-count">0</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Sign in panel -->
+    <div class="panel active" id="panel-signin">
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Full name</label>
+          <input type="text" id="f-name" placeholder="e.g. Jordan Clarke" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label>Organisation</label>
+          <input type="text" id="f-org" placeholder="e.g. Spotlight Agency" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label>Phone number</label>
+          <input type="tel" id="f-phone" placeholder="e.g. 07700 900123" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label>Meeting with</label>
+          <div class="select-wrap">
+            <select id="f-host">
+              <option value="">Select host...</option>
+              <option>Box Office</option>
+              <option>Event Management</option>
+              <option>Marketing &amp; Promotions</option>
+              <option>Technical / Production</option>
+              <option>Artist / Backstage</option>
+              <option>Bar &amp; Hospitality</option>
+              <option>Security</option>
+              <option>General Management</option>
+            </select>
+            <i class="ti ti-chevron-down" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <div class="field form-full">
+          <label>Purpose of visit</label>
+          <div class="visit-type-grid">
+            <div class="visit-chip" onclick="selectVisit(this,'Artist / Performer')"><i class="ti ti-microphone-2" aria-hidden="true"></i>Artist / Performer</div>
+            <div class="visit-chip" onclick="selectVisit(this,'Crew / Technical')"><i class="ti ti-tool" aria-hidden="true"></i>Crew / Technical</div>
+            <div class="visit-chip" onclick="selectVisit(this,'Press / Media')"><i class="ti ti-news" aria-hidden="true"></i>Press / Media</div>
+            <div class="visit-chip" onclick="selectVisit(this,'Promoter / Agent')"><i class="ti ti-briefcase" aria-hidden="true"></i>Promoter / Agent</div>
+            <div class="visit-chip" onclick="selectVisit(this,'Supplier / Delivery')"><i class="ti ti-truck" aria-hidden="true"></i>Supplier / Delivery</div>
+            <div class="visit-chip" onclick="selectVisit(this,'Contractor / Trade')"><i class="ti ti-hammer" aria-hidden="true"></i>Contractor / Trade</div>
+            <div class="visit-chip" onclick="selectVisit(this,'Management / Staff')"><i class="ti ti-id" aria-hidden="true"></i>Management / Staff</div>
+            <div class="visit-chip" onclick="selectVisit(this,'VIP / Guest')"><i class="ti ti-star" aria-hidden="true"></i>VIP / Guest</div>
+            <div class="visit-chip" onclick="selectVisit(this,'Other')"><i class="ti ti-dots" aria-hidden="true"></i>Other</div>
+          </div>
+          <input type="hidden" id="f-purpose" />
+        </div>
+
+        <div class="field form-full">
+          <label>Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#6b6890">(optional)</span></label>
+          <input type="text" id="f-notes" placeholder="Any additional details..." autocomplete="off" />
+        </div>
+
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-title">Check in / check out</div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-primary" onclick="submitEntry('in')">
+          <i class="ti ti-login" aria-hidden="true"></i> Sign in
+        </button>
+        <button class="btn btn-primary" style="background:#6b7280;margin-top:4px" onclick="submitEntry('out')">
+          <i class="ti ti-logout" aria-hidden="true"></i> Sign out
+        </button>
+      </div>
+    </div>
+
+    <!-- Register panel -->
+    <div class="panel" id="panel-register">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total visitors today</div>
+          <div class="stat-num" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Currently on site</div>
+          <div class="stat-num" id="stat-in" style="color:#065f46">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Signed out</div>
+          <div class="stat-num" id="stat-out" style="color:#991b1b">0</div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <input type="text" id="search" placeholder="Search by name, organisation, or purpose..." oninput="renderTable()" />
+        <button class="btn btn-secondary" onclick="exportCSV()">
+          <i class="ti ti-file-spreadsheet" aria-hidden="true"></i> Export
+        </button>
+      </div>
+
+      <div id="table-wrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── End-of-day modal ── -->
+<div class="modal-backdrop" id="eod-modal">
+  <div class="modal">
+    <div class="modal-icon"><i class="ti ti-sun-off" aria-hidden="true"></i></div>
+    <h2>End of day — export register?</h2>
+    <p>It's time to close up. Here's a summary of today's visitors:</p>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="modal-stat-num" id="m-total">0</div>
+        <div class="modal-stat-label">Total</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-num" id="m-in" style="color:#065f46">0</div>
+        <div class="modal-stat-label">On site</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-num" id="m-out" style="color:#991b1b">0</div>
+        <div class="modal-stat-label">Signed out</div>
+      </div>
+    </div>
+    <p>Enter an email address and click <strong>Send</strong> — this will download the CSV and open your email client with it ready to attach.</p>
+    <div class="modal-email-row">
+      <input type="email" id="eod-email" placeholder="e.g. manager@venue.co.uk" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="dismissEod()">
+        <i class="ti ti-x" aria-hidden="true"></i> Dismiss
+      </button>
+      <button class="btn btn-amber" onclick="eodExportAndEmail()">
+        <i class="ti ti-mail-forward" aria-hidden="true"></i> Download &amp; Email
+      </button>
+    </div>
+    <div class="modal-snooze" onclick="snoozeEod()">Remind me in 30 minutes</div>
+  </div>
+</div>
+
+<!-- ── EOD settings modal ── -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-icon" style="background:#ede9fe"><i class="ti ti-settings" aria-hidden="true" style="color:#7c3aed"></i></div>
+    <h2>End-of-day reminder</h2>
+    <p style="margin-bottom:18px">Choose what time the export reminder appears each day.</p>
+    <div class="field" style="margin-bottom:20px">
+      <label>Reminder time</label>
+      <input type="time" id="settings-time" value="23:00" style="padding:13px 14px;border-radius:9px;font-size:15px;border:0.5px solid #e2e0f0;font-family:inherit;outline:none;background:#fff;color:#1a1635" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+  let entries = [];
+  let visitChoice = '';
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function nowStr() { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function dateStr(d) {
+    return d.getDate() + ' ' +
+      ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] +
+      ' ' + d.getFullYear();
+  }
+
+  (function setDate() {
+    const d = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    document.getElementById('live-date').textContent = days[d.getDay()] + ', ' + dateStr(d);
+  })();
+
+  function switchTab(t) {
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + t).classList.add('active');
+    document.getElementById('panel-' + t).classList.add('active');
+    if (t === 'register') renderTable();
+  }
+
+  function selectVisit(el, val) {
+    document.querySelectorAll('.visit-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    visitChoice = val;
+    document.getElementById('f-purpose').value = val;
+  }
+
+  function showToast(msg, isOut) {
+    const t = document.getElementById('toast');
+    t.style.background = isOut ? '#991b1b' : '#065f46';
+    document.getElementById('toast-msg').textContent = msg;
+    t.style.display = 'flex';
+    setTimeout(() => { t.style.display = 'none'; }, 2600);
+  }
+
+  function submitEntry(direction) {
+    const name    = document.getElementById('f-name').value.trim();
+    const org     = document.getElementById('f-org').value.trim();
+    const phone   = document.getElementById('f-phone').value.trim();
+    const host    = document.getElementById('f-host').value;
+    const purpose = visitChoice;
+    const notes   = document.getElementById('f-notes').value.trim();
+
+    if (!name)    { alert('Please enter a name.'); return; }
+    if (!purpose) { alert('Please select a purpose of visit.'); return; }
+
+    const entry = { id: Date.now(), name, org, phone, host, purpose, notes, time: nowStr(), date: dateStr(new Date()), status: direction };
+    entries.unshift(entry);
+    document.getElementById('reg-count').textContent = entries.length;
+    updateStats();
+
+    ['f-name','f-org','f-phone','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-host').value = '';
+    document.querySelectorAll('.visit-chip').forEach(c => c.classList.remove('selected'));
+    visitChoice = '';
+
+    showToast(name + (direction === 'in' ? ' signed in' : ' signed out'), direction === 'out');
+  }
+
+  function updateStats() {
+    document.getElementById('stat-total').textContent = entries.length;
+    document.getElementById('stat-in').textContent  = entries.filter(e => e.status === 'in').length;
+    document.getElementById('stat-out').textContent = entries.filter(e => e.status === 'out').length;
+  }
+
+  function signOutEntry(id) {
+    const e = entries.find(x => x.id === id);
+    if (e) { e.status = 'out'; e.signOutTime = nowStr(); }
+    updateStats(); renderTable();
+  }
+
+  function removeEntry(id) {
+    entries = entries.filter(x => x.id !== id);
+    document.getElementById('reg-count').textContent = entries.length;
+    updateStats(); renderTable();
+  }
+
+  function renderTable() {
+    const q = (document.getElementById('search') || { value: '' }).value.toLowerCase();
+    const filtered = entries.filter(e =>
+      e.name.toLowerCase().includes(q) ||
+      (e.org || '').toLowerCase().includes(q) ||
+      e.purpose.toLowerCase().includes(q)
+    );
+    const wrap = document.getElementById('table-wrap');
+    if (!filtered.length) {
+      wrap.innerHTML = `<div class="empty-state"><i class="ti ti-clipboard-list" aria-hidden="true"></i><p>No entries yet. Sign someone in to get started.</p></div>`;
+      return;
+    }
+    const rows = filtered.map(e => `
+      <tr>
+        <td><strong style="font-weight:500">${esc(e.name)}</strong><br><span style="font-size:12px;color:#6b6890">${esc(e.org || '—')}</span></td>
+        <td class="muted">${esc(e.phone || '—')}</td>
+        <td class="muted">${esc(e.purpose)}</td>
+        <td class="muted">${esc(e.host || '—')}</td>
+        <td class="muted">${e.time}${e.signOutTime ? ' → ' + e.signOutTime : ''}</td>
+        <td><span class="badge badge-${e.status === 'in' ? 'in' : 'out'}">${e.status === 'in' ? 'On site' : 'Signed out'}</span></td>
+        <td>
+          ${e.status === 'in' ? `<button class="btn-danger" onclick="signOutEntry(${e.id})"><i class="ti ti-logout" aria-hidden="true"></i> Out</button>` : ''}
+          <button class="btn-danger" style="margin-left:4px;border-color:transparent;color:#6b6890" onclick="if(confirm('Remove this entry?'))removeEntry(${e.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+        </td>
+      </tr>`).join('');
+    wrap.innerHTML = `<table class="register-table"><thead><tr>
+      <th>Name / Org</th><th>Phone</th><th>Purpose</th><th>Meeting with</th><th>Time</th><th>Status</th><th></th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function exportCSV() {
+    if (!entries.length) { alert('No entries to export yet.'); return; }
+    const cols = ['Name','Organisation','Phone','Meeting with','Purpose of Visit','Notes','Date','Sign-in Time','Sign-out Time','Status'];
+    const rows = entries.map(e =>
+      [e.name,e.org,e.phone,e.host,e.purpose,e.notes,e.date,e.time,e.signOutTime||'',e.status==='in'?'On site':'Signed out']
+      .map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')
+    );
+    const csv  = [cols.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'venue-register-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click(); URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>
