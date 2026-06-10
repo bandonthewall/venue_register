@@ -514,6 +514,14 @@
         <div id="onsite-list"></div>
       </div>
 
+      <!-- Screen E: Goodbye confirmation -->
+      <div id="screen-goodbye" style="display:none" class="welcome-screen">
+        <div class="welcome-icon" style="background:#fff1f1"><i class="ti ti-door-exit" aria-hidden="true" style="color:#c0392b"></i></div>
+        <div class="welcome-title">See you again soon</div>
+        <div class="welcome-name" id="goodbye-name"></div>
+        <div class="welcome-sub">You've been signed out. Thanks for visiting Band on the Wall.</div>
+      </div>
+
     </div>
 
     <!-- ── REGISTER TAB ── -->
@@ -698,7 +706,7 @@
   }
 
   // ── Screen switching within visitor tab ──
-  const SCREENS = ['landing','signin','welcome','signout'];
+  const SCREENS = ['landing','signin','welcome','signout','goodbye'];
   function showScreen(name) {
     SCREENS.forEach(s => {
       document.getElementById('screen-'+s).style.display = s === name ? '' : 'none';
@@ -747,15 +755,15 @@
       catch(e) { console.error(e); alert('Could not save to database.'); return; }
     }
 
-    // Show welcome screen
-    document.getElementById('welcome-name').textContent = name;
-    showScreen('welcome');
-
-    // Clear form
+    // Clear form immediately
     ['f-name','f-org','f-phone','f-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('f-host').value = '';
     document.querySelectorAll('.visit-chip').forEach(c => c.classList.remove('selected'));
     visitChoice = '';
+
+    // Show welcome screen
+    document.getElementById('welcome-name').textContent = name;
+    showScreen('welcome');
 
     // Return to landing after 3 seconds
     setTimeout(() => showScreen('landing'), 3000);
@@ -766,11 +774,11 @@
     if (!window._updateEntry) return;
     try {
       await window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() });
-      showToast(name + ' signed out', true);
-      // If nobody left on site, go back to landing
-      const stillIn = (window._getTodayEntries ? window._getTodayEntries() : [])
-        .filter(e => !e.removed && e.status === 'in' && e.firestoreId !== firestoreId);
-      if (stillIn.length === 0) setTimeout(() => showScreen('landing'), 1200);
+      // Show goodbye confirmation
+      document.getElementById('goodbye-name').textContent = name;
+      showScreen('goodbye');
+      // Return to landing after 3 seconds
+      setTimeout(() => showScreen('landing'), 3000);
     } catch(e) { console.error(e); }
   }
 
