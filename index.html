@@ -384,6 +384,10 @@
         <span class="fb-dot" id="fb-dot"></span>
         <span id="fb-label">Connecting…</span>
       </div>
+      <button class="btn btn-ghost" onclick="openEodSettings()" title="Set end-of-day reminder time">
+        <i class="ti ti-clock" aria-hidden="true"></i>
+        <span id="eod-pill-label">EOD: 11:00 pm</span>
+      </button>
       <button class="btn btn-ghost" onclick="promptExportCSV()">
         <i class="ti ti-download" aria-hidden="true"></i> Export CSV
       </button>
@@ -493,7 +497,7 @@
         <div class="welcome-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
         <div class="welcome-title">Welcome to Band on the Wall</div>
         <div class="welcome-name" id="welcome-name"></div>
-        <div class="welcome-sub">You've been signed in. Please remember to sign out on departure.</div>
+        <div class="welcome-sub">You've been signed in. Please collect your visitor badge from reception.</div>
       </div>
 
       <!-- Screen D: Sign-out list -->
@@ -611,7 +615,7 @@
 <!-- ── Firebase SDK ── -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, orderBy, onSnapshot, getDocs }
+  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, onSnapshot, getDocs }
     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
   // ─────────────────────────────────────────────
@@ -634,27 +638,32 @@
     const db  = getFirestore(app);
     setFbStatus('connected', 'Live');
 
+    // No orderBy — that combination with where() requires a composite index
+    // which can silently expire. Filter by dateKey only and sort client-side.
     const todayQ = query(
       collection(db, 'entries'),
-      where('dateKey', '==', todayKey()),
-      orderBy('timestamp', 'desc')
+      where('dateKey', '==', todayKey())
     );
 
     onSnapshot(todayQ, snap => {
-      todayEntries = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+      todayEntries = snap.docs
+        .map(d => ({ firestoreId: d.id, ...d.data() }))
+        .sort((a, b) => b.timestamp - a.timestamp);
       document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
       updateStats();
       renderTable();
       renderOnsiteList();
     }, err => {
-      console.error(err);
-      setFbStatus('error', 'Error');
+      console.error('Firestore listener error:', err);
+      setFbStatus('error', 'Error — check console');
     });
 
     window._getTodayEntries = () => todayEntries;
     window._getAllEntries = async () => {
-      const snap = await getDocs(query(collection(db, 'entries'), orderBy('timestamp', 'desc')));
-      return snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+      const snap = await getDocs(collection(db, 'entries'));
+      return snap.docs
+        .map(d => ({ firestoreId: d.id, ...d.data() }))
+        .sort((a, b) => b.timestamp - a.timestamp);
     };
     window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
     window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
