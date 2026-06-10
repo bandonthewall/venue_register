@@ -629,11 +629,6 @@
 
   let todayEntries = [];
 
-  function todayKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-
   try {
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
@@ -656,8 +651,6 @@
       setFbStatus('error', 'Error');
     });
 
-    window._db           = () => db;
-    window._todayKey     = todayKey;
     window._getTodayEntries = () => todayEntries;
     window._getAllEntries = async () => {
       const snap = await getDocs(query(collection(db, 'entries'), orderBy('timestamp', 'desc')));
@@ -677,6 +670,11 @@
   function nowStr() { const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); }
   function dateStr(d) {
     return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();
+  }
+  // todayKey lives here (plain JS, no Firebase needed) so it's always available
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
   function setFbStatus(state, label) {
@@ -742,14 +740,9 @@
     const entry = {
       name, org, phone, host, purpose, notes,
       time: nowStr(), date: dateStr(new Date()),
-      dateKey: window._todayKey ? window._todayKey() : '',
+      dateKey: todayKey(),
       timestamp: Date.now(), status: 'in'
     };
-
-    if (window._addEntry) {
-      try { await window._addEntry(entry); }
-      catch(e) { console.error(e); alert('Could not save to database.'); return; }
-    }
 
     // Clear form immediately
     ['f-name','f-org','f-phone','f-notes'].forEach(id => document.getElementById(id).value = '');
@@ -757,9 +750,14 @@
     document.querySelectorAll('.visit-chip').forEach(c => c.classList.remove('selected'));
     visitChoice = '';
 
-    // Show welcome screen
+    // Show welcome screen right away — don't wait for Firebase
     document.getElementById('welcome-name').textContent = name;
     showScreen('welcome');
+
+    // Save to Firebase in the background
+    if (window._addEntry) {
+      window._addEntry(entry).catch(e => console.error('Firebase write failed:', e));
+    }
 
     // Return to landing after 3 seconds
     setTimeout(() => showScreen('landing'), 3000);
@@ -767,15 +765,18 @@
 
   // ── Sign out from onsite list ──
   async function signOutPerson(firestoreId, name) {
-    if (!window._updateEntry) return;
-    try {
-      await window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() });
-      // Show goodbye confirmation
-      document.getElementById('goodbye-name').textContent = name;
-      showScreen('goodbye');
-      // Return to landing after 3 seconds
-      setTimeout(() => showScreen('landing'), 3000);
-    } catch(e) { console.error(e); }
+    // Show goodbye confirmation immediately — don't wait for Firebase
+    document.getElementById('goodbye-name').textContent = name;
+    showScreen('goodbye');
+
+    // Write to Firebase in the background
+    if (window._updateEntry) {
+      window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() })
+        .catch(e => console.error('Firebase sign-out write failed:', e));
+    }
+
+    // Return to landing after 3 seconds
+    setTimeout(() => showScreen('landing'), 3000);
   }
 
   // ── Render the on-site list (sign-out screen) ──
