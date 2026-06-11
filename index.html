@@ -443,7 +443,7 @@
           </div>
           <div class="field">
             <label>Organisation</label>
-            <input type="text" id="f-org" placeholder="e.g. United Nation Orchestra" autocomplete="off" />
+            <input type="text" id="f-org" placeholder="e.g. United Nation Orchestra" autocomplete="off" autocapitalize="words" oninput="this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" autocapitalize="words" oninput="this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" />
           </div>
           <div class="field">
             <label>Phone number</label>
