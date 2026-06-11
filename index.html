@@ -101,7 +101,7 @@
     .tab.active .tab-count { background: var(--accent-tab-bg); color: var(--accent-dark); }
 
     /* ── Content / panels ── */
-    .content { padding: 16px 32px; }
+    .content { padding: 28px 32px; }
     .panel { display: none; }
     .panel.active { display: block; }
 
@@ -174,7 +174,7 @@
     .btn-signout-now:hover { background: #fee2e2; }
 
     /* ── Sign-in form ── */
-    .form-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .form-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
     .back-btn {
       background: var(--bg-secondary); border: 0.5px solid var(--border-secondary);
       color: var(--text-secondary); padding: 8px 14px; border-radius: 8px;
@@ -184,7 +184,7 @@
     .back-btn:hover { background: var(--border-tertiary); }
     .form-header-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
     .form-full  { grid-column: 1 / -1; }
     .field { display: flex; flex-direction: column; gap: 7px; }
     .field label {
@@ -192,7 +192,7 @@
       letter-spacing: 0.02em; text-transform: uppercase;
     }
     .field input, .field select {
-      padding: 10px 14px; border-radius: 9px; font-size: 15px;
+      padding: 13px 14px; border-radius: 9px; font-size: 15px;
       border: 0.5px solid var(--border-secondary);
       background: var(--bg-primary); color: var(--text-primary);
       font-family: var(--font-sans); outline: none;
@@ -209,22 +209,22 @@
     }
 
     /* ── Visit chips ── */
-    .visit-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .visit-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .visit-chip {
-      padding: 8px 10px; border-radius: 9px; text-align: center;
+      padding: 11px 10px; border-radius: 9px; text-align: center;
       border: 0.5px solid var(--border-tertiary); background: var(--bg-secondary);
       color: var(--text-secondary); font-size: 13px; font-weight: 500;
       cursor: pointer; transition: all 0.15s; user-select: none;
     }
     .visit-chip:hover  { border-color: var(--accent); color: var(--accent); }
     .visit-chip.selected { border-color: var(--accent); background: var(--accent-bg); color: var(--accent-dark); }
-    .visit-chip i { display: block; font-size: 18px; margin-bottom: 3px; }
+    .visit-chip i { display: block; font-size: 20px; margin-bottom: 5px; }
 
     /* ── Submit button ── */
-    .divider { height: 0.5px; background: var(--border-tertiary); margin: 14px 0; }
+    .divider { height: 0.5px; background: var(--border-tertiary); margin: 24px 0; }
     .btn-submit {
       background: var(--accent); color: #fff; font-size: 16px;
-      padding: 12px 28px; width: 100%; justify-content: center;
+      padding: 14px 28px; width: 100%; justify-content: center;
       border-radius: 10px; font-family: var(--font-sans); border: none;
       cursor: pointer; display: flex; align-items: center; gap: 8px;
       font-weight: 600; transition: opacity 0.15s;
@@ -613,65 +613,82 @@
 <!-- ── Firebase SDK ── -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, orderBy, onSnapshot, getDocs }
+  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, onSnapshot, getDocs }
     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, signInAnonymously }
+    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-  // ─────────────────────────────────────────────
-  // 🔧 PASTE YOUR FIREBASE CONFIG HERE
-  // ─────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey:            "AIzaSyD0aiCKidXI5gGbz-vXYk3u5zHKrvvjfFk",
-  authDomain:        "visitor-register-9c389.firebaseapp.com",
-  projectId:         "visitor-register-9c389",
-  storageBucket:     "visitor-register-9c389.firebasestorage.app",
-  messagingSenderId: "436872681141",
-  appId:             "1:436872681141:web:6bd99e3d7b9d52214dd0fc"
-};
-  // ─────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey:            "AIzaSyD0aiCKidXI5gGbz-vXYk3u5zHKrvvjfFk",
+    authDomain:        "visitor-register-9c389.firebaseapp.com",
+    projectId:         "visitor-register-9c389",
+    storageBucket:     "visitor-register-9c389.firebasestorage.app",
+    messagingSenderId: "436872681141",
+    appId:             "1:436872681141:web:6bd99e3d7b9d52214dd0fc"
+  };
 
   let todayEntries = [];
 
-  function todayKey() {
+  function moduleTodayKey() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  try {
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
-    setFbStatus('connected', 'Live');
+  // Wrapped in load event so all regular-script functions (setFbStatus etc.)
+  // are guaranteed to exist before we call them.
+  window.addEventListener('load', async () => {
+    let app, db, auth;
 
+    try {
+      app  = initializeApp(firebaseConfig);
+      db   = getFirestore(app);
+      auth = getAuth(app);
+    } catch(e) {
+      console.error('Firebase init failed:', e);
+      setFbStatus('error', 'Offline');
+      return;
+    }
+
+    try {
+      await signInAnonymously(auth);
+      console.log('Anonymous auth OK');
+    } catch(e) {
+      console.error('Anonymous auth failed — enable it in Firebase Console > Authentication > Sign-in method > Anonymous', e.code);
+      setFbStatus('error', 'Auth error');
+      return;
+    }
+
+    // Expose helpers
+    window._getTodayEntries = () => todayEntries;
+    window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
+    window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
+    window._getAllEntries = async () => {
+      const snap = await getDocs(collection(db, 'entries'));
+      return snap.docs
+        .map(d => ({ firestoreId: d.id, ...d.data() }))
+        .sort((a, b) => b.timestamp - a.timestamp);
+    };
+
+    // Single-field where() only — no composite index needed, never expires
     const todayQ = query(
       collection(db, 'entries'),
-      where('dateKey', '==', todayKey()),
-      orderBy('timestamp', 'desc')
+      where('dateKey', '==', moduleTodayKey())
     );
 
     onSnapshot(todayQ, snap => {
-      todayEntries = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+      todayEntries = snap.docs
+        .map(d => ({ firestoreId: d.id, ...d.data() }))
+        .sort((a, b) => b.timestamp - a.timestamp);
       document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
       updateStats();
       renderTable();
       renderOnsiteList();
+      setFbStatus('connected', 'Live');
     }, err => {
-      console.error(err);
-      setFbStatus('error', 'Error');
+      console.error('Firestore snapshot error:', err.code, err.message);
+      setFbStatus('error', 'Error — see console');
     });
-
-    window._db           = () => db;
-    window._todayKey     = todayKey;
-    window._getTodayEntries = () => todayEntries;
-    window._getAllEntries = async () => {
-      const snap = await getDocs(query(collection(db, 'entries'), orderBy('timestamp', 'desc')));
-      return snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
-    };
-    window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
-    window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
-
-  } catch(e) {
-    console.error('Firebase init failed:', e);
-    setFbStatus('error', 'Offline');
-  }
+  });
 </script>
 
 <script>
