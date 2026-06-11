@@ -384,6 +384,10 @@
         <span class="fb-dot" id="fb-dot"></span>
         <span id="fb-label">Connecting…</span>
       </div>
+      <button class="btn btn-ghost" onclick="openEodSettings()" title="Set end-of-day reminder time">
+        <i class="ti ti-clock" aria-hidden="true"></i>
+        <span id="eod-pill-label">EOD: 11:00 pm</span>
+      </button>
       <button class="btn btn-ghost" onclick="promptExportCSV()">
         <i class="ti ti-download" aria-hidden="true"></i> Export CSV
       </button>
@@ -609,65 +613,82 @@
 <!-- ── Firebase SDK ── -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, orderBy, onSnapshot, getDocs }
+  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, onSnapshot, getDocs }
     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, signInAnonymously }
+    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-  // ─────────────────────────────────────────────
-  // 🔧 PASTE YOUR FIREBASE CONFIG HERE
-  // ─────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey:            "AIzaSyD0aiCKidXI5gGbz-vXYk3u5zHKrvvjfFk",
-  authDomain:        "visitor-register-9c389.firebaseapp.com",
-  projectId:         "visitor-register-9c389",
-  storageBucket:     "visitor-register-9c389.firebasestorage.app",
-  messagingSenderId: "436872681141",
-  appId:             "1:436872681141:web:6bd99e3d7b9d52214dd0fc"
-};
-  // ─────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey:            "AIzaSyD0aiCKidXI5gGbz-vXYk3u5zHKrvvjfFk",
+    authDomain:        "visitor-register-9c389.firebaseapp.com",
+    projectId:         "visitor-register-9c389",
+    storageBucket:     "visitor-register-9c389.firebasestorage.app",
+    messagingSenderId: "436872681141",
+    appId:             "1:436872681141:web:6bd99e3d7b9d52214dd0fc"
+  };
 
   let todayEntries = [];
 
-  function todayKey() {
+  function moduleTodayKey() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  try {
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
-    setFbStatus('connected', 'Live');
+  // Wrapped in load event so all regular-script functions (setFbStatus etc.)
+  // are guaranteed to exist before we call them.
+  window.addEventListener('load', async () => {
+    let app, db, auth;
 
+    try {
+      app  = initializeApp(firebaseConfig);
+      db   = getFirestore(app);
+      auth = getAuth(app);
+    } catch(e) {
+      console.error('Firebase init failed:', e);
+      setFbStatus('error', 'Offline');
+      return;
+    }
+
+    try {
+      await signInAnonymously(auth);
+      console.log('Anonymous auth OK');
+    } catch(e) {
+      console.error('Anonymous auth failed — enable it in Firebase Console > Authentication > Sign-in method > Anonymous', e.code);
+      setFbStatus('error', 'Auth error');
+      return;
+    }
+
+    // Expose helpers
+    window._getTodayEntries = () => todayEntries;
+    window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
+    window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
+    window._getAllEntries = async () => {
+      const snap = await getDocs(collection(db, 'entries'));
+      return snap.docs
+        .map(d => ({ firestoreId: d.id, ...d.data() }))
+        .sort((a, b) => b.timestamp - a.timestamp);
+    };
+
+    // Single-field where() only — no composite index needed, never expires
     const todayQ = query(
       collection(db, 'entries'),
-      where('dateKey', '==', todayKey()),
-      orderBy('timestamp', 'desc')
+      where('dateKey', '==', moduleTodayKey())
     );
 
     onSnapshot(todayQ, snap => {
-      todayEntries = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+      todayEntries = snap.docs
+        .map(d => ({ firestoreId: d.id, ...d.data() }))
+        .sort((a, b) => b.timestamp - a.timestamp);
       document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
       updateStats();
       renderTable();
       renderOnsiteList();
+      setFbStatus('connected', 'Live');
     }, err => {
-      console.error(err);
-      setFbStatus('error', 'Error');
+      console.error('Firestore snapshot error:', err.code, err.message);
+      setFbStatus('error', 'Error — see console');
     });
-
-    window._db           = () => db;
-    window._todayKey     = todayKey;
-    window._getTodayEntries = () => todayEntries;
-    window._getAllEntries = async () => {
-      const snap = await getDocs(query(collection(db, 'entries'), orderBy('timestamp', 'desc')));
-      return snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
-    };
-    window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
-    window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
-
-  } catch(e) {
-    console.error('Firebase init failed:', e);
-    setFbStatus('error', 'Offline');
-  }
+  });
 </script>
 
 <script>
