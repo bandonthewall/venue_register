@@ -753,7 +753,7 @@
     const entry = {
       name, org, phone, host, purpose, notes,
       time: nowStr(), date: dateStr(new Date()),
-      dateKey: window._todayKey ? window._todayKey() : '',
+      dateKey: (function(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })(),
       timestamp: Date.now(), status: 'in'
     };
 
