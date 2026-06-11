@@ -101,6 +101,974 @@
     .tab.active .tab-count { background: var(--accent-tab-bg); color: var(--accent-dark); }
 
     /* ── Content / panels ── */
+    .content { padding: 16px 32px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Landing: two big action buttons ── */
+    .landing {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 32px; gap: 20px;
+      min-height: 420px;
+    }
+    .landing-title {
+      font-size: 22px; font-weight: 600; color: var(--text-primary);
+      margin-bottom: 8px; text-align: center;
+    }
+    .landing-sub {
+      font-size: 15px; color: var(--text-secondary); margin-bottom: 16px; text-align: center;
+    }
+    .landing-btns { display: flex; gap: 16px; width: 100%; max-width: 440px; }
+    .landing-btn {
+      flex: 1; padding: 28px 20px; border-radius: 16px; border: none;
+      cursor: pointer; font-family: var(--font-sans); font-size: 17px;
+      font-weight: 600; display: flex; flex-direction: column;
+      align-items: center; gap: 12px; transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .landing-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.13); }
+    .landing-btn i { font-size: 36px; }
+    .landing-btn-in  { background: var(--accent); color: #fff; }
+    .landing-btn-out { background: var(--bg-primary); color: var(--text-primary); border: 1.5px solid var(--border-secondary); }
+
+    /* ── Welcome screen ── */
+    .welcome-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 32px; text-align: center;
+      min-height: 420px; gap: 16px;
+    }
+    .welcome-icon {
+      width: 72px; height: 72px; border-radius: 20px;
+      background: var(--accent-bg); display: flex; align-items: center;
+      justify-content: center; margin-bottom: 8px;
+    }
+    .welcome-icon i { font-size: 38px; color: var(--accent); }
+    .welcome-title { font-size: 26px; font-weight: 600; color: var(--text-primary); }
+    .welcome-name  { font-size: 20px; color: var(--accent); font-weight: 500; }
+    .welcome-sub   { font-size: 15px; color: var(--text-secondary); max-width: 320px; line-height: 1.6; }
+
+    /* ── Sign-out list ── */
+    .signout-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .signout-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+    .signout-sub   { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+    .onsite-list   { display: flex; flex-direction: column; gap: 8px; }
+    .onsite-card {
+      background: var(--bg-primary); border: 0.5px solid var(--border-tertiary);
+      border-radius: 12px; padding: 16px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .onsite-info { flex: 1; min-width: 0; }
+    .onsite-name { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+    .onsite-meta { font-size: 13px; color: var(--text-secondary); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .onsite-time { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+    .btn-signout-now {
+      background: var(--bg-danger); color: var(--text-danger);
+      border: 0.5px solid #fca5a5; padding: 9px 16px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+      font-family: var(--font-sans); display: flex; align-items: center; gap: 6px;
+      transition: background 0.15s; flex-shrink: 0;
+    }
+    .btn-signout-now:hover { background: #fee2e2; }
+
+    /* ── Sign-in form ── */
+    .form-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .back-btn {
+      background: var(--bg-secondary); border: 0.5px solid var(--border-secondary);
+      color: var(--text-secondary); padding: 8px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-sans);
+      display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s;
+    }
+    .back-btn:hover { background: var(--border-tertiary); }
+    .form-header-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+    .form-full  { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field label {
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      letter-spacing: 0.02em; text-transform: uppercase;
+    }
+    .field input, .field select {
+      padding: 10px 14px; border-radius: 9px; font-size: 15px;
+      border: 0.5px solid var(--border-secondary);
+      background: var(--bg-primary); color: var(--text-primary);
+      font-family: var(--font-sans); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(61,122,110,0.15);
+    }
+    .select-wrap { position: relative; }
+    .select-wrap i {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: var(--text-secondary); font-size: 18px;
+    }
+
+    /* ── Visit chips ── */
+    .visit-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .visit-chip {
+      padding: 8px 10px; border-radius: 9px; text-align: center;
+      border: 0.5px solid var(--border-tertiary); background: var(--bg-secondary);
+      color: var(--text-secondary); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; user-select: none;
+    }
+    .visit-chip:hover  { border-color: var(--accent); color: var(--accent); }
+    .visit-chip.selected { border-color: var(--accent); background: var(--accent-bg); color: var(--accent-dark); }
+    .visit-chip i { display: block; font-size: 18px; margin-bottom: 3px; }
+
+    /* ── Submit button ── */
+    .divider { height: 0.5px; background: var(--border-tertiary); margin: 14px 0; }
+    .btn-submit {
+      background: var(--accent); color: #fff; font-size: 16px;
+      padding: 12px 28px; width: 100%; justify-content: center;
+      border-radius: 10px; font-family: var(--font-sans); border: none;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      font-weight: 600; transition: opacity 0.15s;
+    }
+    .btn-submit:hover { opacity: 0.88; }
+
+    /* ── Register tab ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--bg-primary); border: 0.5px solid var(--border-tertiary);
+      border-radius: 10px; padding: 16px 18px;
+    }
+    .stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .stat-num   { font-size: 26px; font-weight: 500; color: var(--text-primary); }
+
+    .filter-row { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+    .filter-row input {
+      flex: 1; padding: 10px 14px; border-radius: 8px; font-size: 14px;
+      border: 0.5px solid var(--border-secondary);
+      background: var(--bg-primary); color: var(--text-primary);
+      font-family: var(--font-sans); outline: none; transition: border-color 0.15s;
+    }
+    .filter-row input:focus { border-color: var(--accent); }
+
+    .register-table { width: 100%; border-collapse: collapse; }
+    .register-table thead tr { border-bottom: 0.5px solid var(--border-secondary); }
+    .register-table th {
+      text-align: left; font-size: 12px; font-weight: 500; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 12px;
+    }
+    .register-table tbody tr { border-bottom: 0.5px solid var(--border-tertiary); transition: background 0.1s; }
+    .register-table tbody tr:hover { background: var(--bg-secondary); }
+    .register-table td { padding: 13px 12px; font-size: 14px; color: var(--text-primary); vertical-align: middle; }
+    .register-table td.muted { color: var(--text-secondary); font-size: 13px; }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge-in  { background: #d1f0e8; color: #1a5c47; }
+    .badge-out { background: #fee2e2; color: #991b1b; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+    .empty-state i { font-size: 40px; color: var(--border-tertiary); display: block; margin-bottom: 12px; }
+
+    /* ── Toast ── */
+    .success-toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: #1a5c47; color: #fff; padding: 12px 22px; border-radius: 10px;
+      font-size: 14px; font-weight: 500; display: none; z-index: 1100;
+      white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      align-items: center; gap: 8px;
+    }
+
+    /* ── Firebase status ── */
+    .fb-status {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 12px;
+      color: rgba(255,255,255,0.5); padding: 5px 10px; border-radius: 20px;
+      border: 0.5px solid rgba(255,255,255,0.1);
+    }
+    .fb-dot { width: 7px; height: 7px; border-radius: 50%; background: #6b7280; flex-shrink: 0; }
+    .fb-dot.connected { background: #34d399; }
+    .fb-dot.error     { background: #f87171; }
+
+    /* ── Modals ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(20,30,30,0.6);
+      backdrop-filter: blur(3px); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-backdrop.visible { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--bg-primary); border-radius: 16px; padding: 32px;
+      max-width: 440px; width: calc(100% - 40px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      transform: translateY(12px); transition: transform 0.2s;
+    }
+    .modal-backdrop.visible .modal { transform: translateY(0); }
+    .modal-icon {
+      width: 52px; height: 52px; border-radius: 14px; background: #fef3c7;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
+    }
+    .modal-icon i { font-size: 26px; color: #d97706; }
+    .modal h2 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+    .modal p  { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 6px; }
+    .modal-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 18px 0; }
+    .modal-stat  { background: var(--bg-secondary); border-radius: 10px; padding: 12px; text-align: center; }
+    .modal-stat-num   { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+    .modal-stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+    .modal-email-row  { display: flex; gap: 8px; margin: 16px 0 20px; }
+    .modal-email-row input {
+      flex: 1; padding: 11px 13px; border-radius: 8px; font-size: 14px;
+      border: 0.5px solid var(--border-secondary); background: var(--bg-primary);
+      color: var(--text-primary); font-family: var(--font-sans); outline: none;
+      transition: border-color 0.15s;
+    }
+    .modal-email-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(61,122,110,0.15); }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+    .modal-snooze {
+      font-size: 12px; color: var(--text-secondary); text-align: center;
+      margin-top: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+    }
+    .modal-snooze:hover { color: var(--text-primary); }
+
+    .pw-input-wrap { margin: 18px 0 22px; }
+    .pw-input-wrap input {
+      width: 100%; padding: 13px 14px; border-radius: 9px; font-size: 15px;
+      border: 0.5px solid var(--border-secondary); background: var(--bg-primary);
+      color: var(--text-primary); font-family: var(--font-sans); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s; letter-spacing: 0.1em;
+    }
+    .pw-input-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(61,122,110,0.15); }
+    .pw-error { font-size: 13px; color: var(--text-danger); margin-top: 8px; display: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .header  { padding: 14px 18px; }
+      .content { padding: 18px; }
+      .tabs    { padding: 0 18px; }
+      .landing-btns { flex-direction: column; }
+      .form-grid    { grid-template-columns: 1fr; }
+      .form-full    { grid-column: 1; }
+      .visit-type-grid  { grid-template-columns: repeat(2, 1fr); }
+      .stats-row        { grid-template-columns: 1fr; }
+      .filter-row       { flex-direction: column; }
+      .filter-row input { width: 100%; }
+      .fb-status span   { display: none; }
+      .register-table th:nth-child(2), .register-table td:nth-child(2),
+      .register-table th:nth-child(4), .register-table td:nth-child(4) { display: none; }
+      .onsite-card { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="success-toast" id="toast">
+  <i class="ti ti-check" aria-hidden="true"></i>
+  <span id="toast-msg"></span>
+</div>
+
+<div class="app-wrap">
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="venue-avatar">
+        <img src="images/BOTW_ProfileImage_01.png" alt="Venue logo"
+          onerror="this.parentElement.innerHTML='<i class=\'ti ti-music\' style=\'font-size:22px;color:#52a595;margin:auto;display:flex;align-items:center;justify-content:center;height:100%\'></i>'" />
+      </div>
+      <div>
+        <div class="header-title">Venue Register</div>
+        <div class="header-sub" id="live-date"></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="fb-status" id="fb-status">
+        <span class="fb-dot" id="fb-dot"></span>
+        <span id="fb-label">Connecting…</span>
+      </div>
+      <button class="btn btn-ghost" onclick="openEodSettings()" title="Set end-of-day reminder time">
+        <i class="ti ti-clock" aria-hidden="true"></i>
+        <span id="eod-pill-label">EOD: 11:00 pm</span>
+      </button>
+      <button class="btn btn-ghost" onclick="promptExportCSV()">
+        <i class="ti ti-download" aria-hidden="true"></i> Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('visitor')" id="tab-visitor">
+      <i class="ti ti-door-enter" aria-hidden="true" style="margin-right:6px;font-size:15px;vertical-align:-2px"></i>Visitors
+    </div>
+    <div class="tab" onclick="switchTab('register')" id="tab-register">
+      Today's Register <span class="tab-count" id="reg-count">0</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── VISITOR TAB ── -->
+    <div class="panel active" id="panel-visitor">
+
+      <!-- Screen A: Landing — Sign In / Sign Out choice -->
+      <div id="screen-landing" class="landing">
+        <div>
+          <div class="landing-title">Welcome to Band on the Wall</div>
+          <div class="landing-sub">Please select an option below</div>
+        </div>
+        <div class="landing-btns">
+          <button class="landing-btn landing-btn-in" onclick="showScreen('signin')">
+            <i class="ti ti-login" aria-hidden="true"></i>
+            Sign In
+          </button>
+          <button class="landing-btn landing-btn-out" onclick="showScreen('signout')">
+            <i class="ti ti-logout" aria-hidden="true"></i>
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+      <!-- Screen B: Sign-in form -->
+      <div id="screen-signin" style="display:none">
+        <div class="form-header">
+          <button class="back-btn" onclick="showScreen('landing')">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+          </button>
+          <div class="form-header-title">Sign in</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="f-name" placeholder="e.g. Dizzy Gillespie" autocomplete="off" autocapitalize="words" oninput="this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" autocapitalize="words" oninput="this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" />
+          </div>
+          <div class="field">
+            <label>Organisation</label>
+            <input type="text" id="f-org" placeholder="e.g. Spotlight Agency" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Phone number</label>
+            <input type="tel" id="f-phone" placeholder="e.g. 07700 900123" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Meeting with</label>
+            <div class="select-wrap">
+              <select id="f-host">
+                <option value="">Select host...</option>
+                <option>Gavin Sharp</option>
+                <option>John Shephard</option>
+                <option>Santana Guérout</option>
+                <option>Laura Burgess</option>
+                <option>Debbie Ashton</option>
+                <option>Alice McIllwraith</option>
+                <option>Andy Adams</option>
+                <option>Connor McGarry</option>
+                <option>Ellie Wilson</option>
+                <option>Leaharen Russo</option>
+                <option>Angus McBryde</option>
+                <option>Alex Berry</option>
+                <option>Belle Coleman</option>
+                <option>Other</option>
+              </select>
+              <i class="ti ti-chevron-down" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="field form-full">
+            <label>Purpose of visit</label>
+            <div class="visit-type-grid">
+              <div class="visit-chip" onclick="selectVisit(this,'Artist / Performer')"><i class="ti ti-microphone-2"></i>Artist / Performer</div>
+              <div class="visit-chip" onclick="selectVisit(this,'Crew / Technical')"><i class="ti ti-tool"></i>Crew / Technical</div>
+              <div class="visit-chip" onclick="selectVisit(this,'Press / Media')"><i class="ti ti-news"></i>Press / Media</div>
+              <div class="visit-chip" onclick="selectVisit(this,'Promoter / Agent')"><i class="ti ti-briefcase"></i>Promoter / Agent</div>
+              <div class="visit-chip" onclick="selectVisit(this,'Supplier / Delivery')"><i class="ti ti-truck"></i>Supplier / Delivery</div>
+              <div class="visit-chip" onclick="selectVisit(this,'Contractor / Trade')"><i class="ti ti-hammer"></i>Contractor / Trade</div>
+              <div class="visit-chip" onclick="selectVisit(this,'Practitioner')"><i class="ti ti-id"></i>Practitioner</div>
+              <div class="visit-chip" onclick="selectVisit(this,'VIP / Guest')"><i class="ti ti-star"></i>VIP / Guest</div>
+              <div class="visit-chip" onclick="selectVisit(this,'Other')"><i class="ti ti-dots"></i>Other</div>
+            </div>
+          </div>
+          <div class="field form-full">
+            <label>Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-secondary)">(optional)</span></label>
+            <input type="text" id="f-notes" placeholder="Any additional details..." autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <button class="btn-submit" onclick="submitSignIn()">
+          <i class="ti ti-login" aria-hidden="true"></i> Complete Sign In
+        </button>
+      </div>
+
+      <!-- Screen C: Welcome confirmation -->
+      <div id="screen-welcome" style="display:none" class="welcome-screen">
+        <div class="welcome-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+        <div class="welcome-title">Welcome to Band on the Wall</div>
+        <div class="welcome-name" id="welcome-name"></div>
+        <div class="welcome-sub">You've been signed in. Please sign out on departure.</div>
+      </div>
+
+      <!-- Screen D: Sign-out list -->
+      <div id="screen-signout" style="display:none">
+        <div class="signout-header">
+          <div>
+            <div class="signout-title">Who's signing out?</div>
+            <div class="signout-sub">Tap your name below</div>
+          </div>
+          <button class="back-btn" onclick="showScreen('landing')">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+          </button>
+        </div>
+        <div id="onsite-list"></div>
+      </div>
+
+    </div>
+
+    <!-- ── REGISTER TAB ── -->
+    <div class="panel" id="panel-register">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total visitors today</div>
+          <div class="stat-num" id="stat-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Currently on site</div>
+          <div class="stat-num" id="stat-in" style="color:#1a5c47">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Signed out</div>
+          <div class="stat-num" id="stat-out" style="color:#991b1b">—</div>
+        </div>
+      </div>
+      <div class="filter-row">
+        <input type="text" id="search" placeholder="Search by name, organisation, or purpose..." oninput="renderTable()" />
+        <button class="btn btn-secondary" onclick="promptExportCSV()">
+          <i class="ti ti-file-spreadsheet" aria-hidden="true"></i> Export all
+        </button>
+      </div>
+      <div id="table-wrap">
+        <div class="empty-state"><i class="ti ti-loader-2" aria-hidden="true"></i><p>Loading today's entries…</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ── EOD modal ── -->
+<div class="modal-backdrop" id="eod-modal">
+  <div class="modal">
+    <div class="modal-icon"><i class="ti ti-sun-off" aria-hidden="true"></i></div>
+    <h2>End of day — export register?</h2>
+    <p>It's time to close up. Here's a summary of today's visitors:</p>
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="modal-stat-num" id="m-total">0</div><div class="modal-stat-label">Total</div></div>
+      <div class="modal-stat"><div class="modal-stat-num" id="m-in" style="color:#1a5c47">0</div><div class="modal-stat-label">On site</div></div>
+      <div class="modal-stat"><div class="modal-stat-num" id="m-out" style="color:#991b1b">0</div><div class="modal-stat-label">Signed out</div></div>
+    </div>
+    <p>Enter an email address then click <strong>Download &amp; Email</strong> — this downloads today's CSV and opens your email client with it ready to attach.</p>
+    <div class="modal-email-row">
+      <input type="email" id="eod-email" placeholder="e.g. manager@venue.co.uk" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="dismissEod()"><i class="ti ti-x"></i> Dismiss</button>
+      <button class="btn btn-amber" onclick="eodExportAndEmail()"><i class="ti ti-mail-forward"></i> Download &amp; Email</button>
+    </div>
+    <div class="modal-snooze" onclick="snoozeEod()">Remind me in 30 minutes</div>
+  </div>
+</div>
+
+<!-- ── EOD settings modal ── -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-icon" style="background:var(--accent-bg)"><i class="ti ti-settings" style="color:var(--accent)"></i></div>
+    <h2>End-of-day reminder</h2>
+    <p style="margin-bottom:18px">Choose what time the export reminder appears each day.</p>
+    <div class="field" style="margin-bottom:20px">
+      <label>Reminder time</label>
+      <input type="time" id="settings-time" value="23:00" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-teal" style="margin-top:0" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Password modal ── -->
+<div class="modal-backdrop" id="pw-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-icon" style="background:var(--accent-bg)"><i class="ti ti-lock" style="color:var(--accent)"></i></div>
+    <h2>Export CSV</h2>
+    <p>This export contains all historical visitor data. Enter the export password to continue.</p>
+    <div class="pw-input-wrap">
+      <input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPassword()" />
+      <div class="pw-error" id="pw-error">Incorrect password. Please try again.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closePwModal()">Cancel</button>
+      <button class="btn btn-teal" onclick="checkPassword()"><i class="ti ti-download"></i> Export</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Firebase SDK ── -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, onSnapshot, getDocs }
+    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, signInAnonymously, onAuthStateChanged }
+    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyD0aiCKidXI5gGbz-vXYk3u5zHKrvvjfFk",
+    authDomain:        "visitor-register-9c389.firebaseapp.com",
+    projectId:         "visitor-register-9c389",
+    storageBucket:     "visitor-register-9c389.firebasestorage.app",
+    messagingSenderId: "436872681141",
+    appId:             "1:436872681141:web:6bd99e3d7b9d52214dd0fc"
+  };
+
+  let todayEntries = [];
+
+  function moduleTodayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  window.addEventListener('load', () => {
+    let app, db, auth;
+    try {
+      app  = initializeApp(firebaseConfig);
+      db   = getFirestore(app);
+      auth = getAuth(app);
+    } catch(e) {
+      console.error('Firebase init failed:', e);
+      setFbStatus('error', 'Offline');
+      return;
+    }
+
+    window._getTodayEntries = () => todayEntries;
+    window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
+    window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
+    window._getAllEntries = async () => {
+      const snap = await getDocs(collection(db, 'entries'));
+      return snap.docs
+        .map(d => ({ firestoreId: d.id, ...d.data() }))
+        .sort((a, b) => b.timestamp - a.timestamp);
+    };
+
+    // Only start the snapshot listener once auth is confirmed
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        const todayQ = query(
+          collection(db, 'entries'),
+          where('dateKey', '==', moduleTodayKey())
+        );
+        onSnapshot(todayQ, snap => {
+          todayEntries = snap.docs
+            .map(d => ({ firestoreId: d.id, ...d.data() }))
+            .sort((a, b) => b.timestamp - a.timestamp);
+          document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
+          updateStats();
+          renderTable();
+          renderOnsiteList();
+          setFbStatus('connected', 'Live');
+        }, err => {
+          console.error('Firestore error:', err.code, err.message);
+          setFbStatus('error', 'Error');
+        });
+      }
+    });
+
+    signInAnonymously(auth).catch(e => {
+      console.error('Auth failed:', e.code);
+      setFbStatus('error', 'Auth error');
+    });
+  });
+</script>
+
+<script>
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function nowStr() { const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+  function dateStr(d) {
+    return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();
+  }
+
+  function setFbStatus(state, label) {
+    const dot = document.getElementById('fb-dot');
+    dot.className = 'fb-dot'+(state==='connected'?' connected':state==='error'?' error':'');
+    document.getElementById('fb-label').textContent = label;
+  }
+
+  // Date in header
+  (function() {
+    const d = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    document.getElementById('live-date').textContent = days[d.getDay()]+', '+dateStr(d);
+  })();
+
+  // ── Tab switching ──
+  function switchTab(t) {
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-'+t).classList.add('active');
+    document.getElementById('panel-'+t).classList.add('active');
+    if (t === 'register') renderTable();
+  }
+
+  // ── Screen switching within visitor tab ──
+  const SCREENS = ['landing','signin','welcome','signout'];
+  function showScreen(name) {
+    SCREENS.forEach(s => {
+      document.getElementById('screen-'+s).style.display = s === name ? '' : 'none';
+    });
+    if (name === 'signout') renderOnsiteList();
+  }
+
+  // ── Visit chips ──
+  let visitChoice = '';
+  function selectVisit(el, val) {
+    document.querySelectorAll('.visit-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    visitChoice = val;
+  }
+
+  // ── Toast ──
+  function showToast(msg, isOut) {
+    const t = document.getElementById('toast');
+    t.style.background = isOut ? '#7f1d1d' : '#1a5c47';
+    document.getElementById('toast-msg').textContent = msg;
+    t.style.display = 'flex';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+  }
+
+  // ── Submit sign-in ──
+  async function submitSignIn() {
+    const name    = document.getElementById('f-name').value.trim();
+    const org     = document.getElementById('f-org').value.trim();
+    const phone   = document.getElementById('f-phone').value.trim();
+    const host    = document.getElementById('f-host').value;
+    const purpose = visitChoice;
+    const notes   = document.getElementById('f-notes').value.trim();
+
+    if (!name)    { alert('Please enter a name.'); return; }
+    if (!purpose) { alert('Please select a purpose of visit.'); return; }
+
+    const entry = {
+      name, org, phone, host, purpose, notes,
+      time: nowStr(), date: dateStr(new Date()),
+      dateKey: window._todayKey ? window._todayKey() : '',
+      timestamp: Date.now(), status: 'in'
+    };
+
+    if (window._addEntry) {
+      try { await window._addEntry(entry); }
+      catch(e) { console.error(e); alert('Could not save to database.'); return; }
+    }
+
+    // Show welcome screen
+    document.getElementById('welcome-name').textContent = name;
+    showScreen('welcome');
+
+    // Clear form
+    ['f-name','f-org','f-phone','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-host').value = '';
+    document.querySelectorAll('.visit-chip').forEach(c => c.classList.remove('selected'));
+    visitChoice = '';
+
+    // Return to landing after 3 seconds
+    setTimeout(() => showScreen('landing'), 3000);
+  }
+
+  // ── Sign out from onsite list ──
+  async function signOutPerson(firestoreId, name) {
+    if (!window._updateEntry) return;
+    try {
+      await window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() });
+      showToast(name + ' signed out', true);
+      // If nobody left on site, go back to landing
+      const stillIn = (window._getTodayEntries ? window._getTodayEntries() : [])
+        .filter(e => !e.removed && e.status === 'in' && e.firestoreId !== firestoreId);
+      if (stillIn.length === 0) setTimeout(() => showScreen('landing'), 1200);
+    } catch(e) { console.error(e); }
+  }
+
+  // ── Render the on-site list (sign-out screen) ──
+  function renderOnsiteList() {
+    const onsite = (window._getTodayEntries ? window._getTodayEntries() : [])
+      .filter(e => !e.removed && e.status === 'in');
+    const wrap = document.getElementById('onsite-list');
+    if (!wrap) return;
+    if (!onsite.length) {
+      wrap.innerHTML = `<div class="empty-state"><i class="ti ti-circle-check" aria-hidden="true"></i><p>Nobody is currently signed in.</p></div>`;
+      return;
+    }
+    wrap.innerHTML = onsite.map(e => `
+      <div class="onsite-card">
+        <div class="onsite-info">
+          <div class="onsite-name">${esc(e.name)}</div>
+          <div class="onsite-meta">${esc(e.purpose)}${e.org ? ' · '+esc(e.org) : ''}</div>
+        </div>
+        <div class="onsite-time">In at ${e.time}</div>
+        <button class="btn-signout-now" onclick="signOutPerson('${e.firestoreId}','${esc(e.name)}')">
+          <i class="ti ti-logout" aria-hidden="true"></i> Sign out
+        </button>
+      </div>`).join('');
+  }
+
+  // ── Stats ──
+  function updateStats() {
+    const entries = (window._getTodayEntries ? window._getTodayEntries() : []).filter(e => !e.removed);
+    document.getElementById('stat-total').textContent = entries.length;
+    document.getElementById('stat-in').textContent    = entries.filter(e => e.status==='in').length;
+    document.getElementById('stat-out').textContent   = entries.filter(e => e.status==='out').length;
+    document.getElementById('m-total').textContent    = entries.length;
+    document.getElementById('m-in').textContent       = entries.filter(e => e.status==='in').length;
+    document.getElementById('m-out').textContent      = entries.filter(e => e.status==='out').length;
+  }
+
+  // ── Register table (staff view) ──
+  async function removeEntry(firestoreId) {
+    if (!confirm('Remove this entry?')) return;
+    if (window._updateEntry) {
+      try { await window._updateEntry(firestoreId, { removed: true }); }
+      catch(e) { console.error(e); }
+    }
+  }
+
+  async function signOutEntry(firestoreId) {
+    if (window._updateEntry) {
+      try { await window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() }); }
+      catch(e) { console.error(e); }
+    }
+  }
+
+  function renderTable() {
+    const q = (document.getElementById('search')||{value:''}).value.toLowerCase();
+    const entries = (window._getTodayEntries ? window._getTodayEntries() : []).filter(e => !e.removed);
+    const filtered = entries.filter(e =>
+      e.name.toLowerCase().includes(q) ||
+      (e.org||'').toLowerCase().includes(q) ||
+      e.purpose.toLowerCase().includes(q)
+    );
+    const wrap = document.getElementById('table-wrap');
+    if (!filtered.length) {
+      wrap.innerHTML = `<div class="empty-state"><i class="ti ti-clipboard-list"></i><p>No entries for today yet.</p></div>`;
+      return;
+    }
+    const rows = filtered.map(e => `
+      <tr>
+        <td><strong style="font-weight:500">${esc(e.name)}</strong><br><span style="font-size:12px;color:var(--text-secondary)">${esc(e.org||'—')}</span></td>
+        <td class="muted">${esc(e.phone||'—')}</td>
+        <td class="muted">${esc(e.purpose)}</td>
+        <td class="muted">${esc(e.host||'—')}</td>
+        <td class="muted">${e.time}${e.signOutTime?' → '+e.signOutTime:''}</td>
+        <td><span class="badge badge-${e.status==='in'?'in':'out'}">${e.status==='in'?'On site':'Signed out'}</span></td>
+        <td>
+          ${e.status==='in'?`<button class="btn-danger-soft" onclick="signOutEntry('${e.firestoreId}')"><i class="ti ti-logout"></i> Out</button>`:''}
+          <button class="btn-danger-soft" style="margin-left:4px;border-color:transparent;color:var(--text-secondary)" onclick="removeEntry('${e.firestoreId}')"><i class="ti ti-trash"></i></button>
+        </td>
+      </tr>`).join('');
+    wrap.innerHTML = `<table class="register-table"><thead><tr>
+      <th>Name / Org</th><th>Phone</th><th>Purpose</th><th>Meeting with</th><th>Time</th><th>Status</th><th></th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
+
+  // ── Password-protected CSV ──
+  const EXPORT_PASSWORD = 'venue2024';
+
+  function promptExportCSV() {
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-error').style.display = 'none';
+    document.getElementById('pw-modal').classList.add('visible');
+    setTimeout(() => document.getElementById('pw-input').focus(), 200);
+  }
+  function closePwModal() { document.getElementById('pw-modal').classList.remove('visible'); }
+  async function checkPassword() {
+    if (document.getElementById('pw-input').value !== EXPORT_PASSWORD) {
+      document.getElementById('pw-error').style.display = 'block';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+      return;
+    }
+    closePwModal();
+    await exportCSV();
+  }
+  async function exportCSV() {
+    let all = window._getAllEntries ? await window._getAllEntries() : [];
+    all = all.filter(e => !e.removed);
+    if (!all.length) { alert('No entries to export yet.'); return; }
+    const cols = ['Name','Organisation','Phone','Meeting with','Purpose of Visit','Notes','Date','Sign-in Time','Sign-out Time','Status'];
+    const rows = all.map(e =>
+      [e.name,e.org,e.phone,e.host,e.purpose,e.notes,e.date,e.time,e.signOutTime||'',e.status==='in'?'On site':'Signed out']
+      .map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')
+    );
+    const blob = new Blob([[cols.join(','),...rows].join('\n')], {type:'text/csv'});
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: 'venue-register-all-'+new Date().toISOString().slice(0,10)+'.csv'
+    });
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ── EOD reminder ──
+  let eodHour=23, eodMin=0, eodSnoozed=false, eodDismissedDate='';
+
+  function updateEodPill() {
+    const ampm = eodHour>=12?'pm':'am', h12=eodHour%12||12;
+    document.getElementById('eod-pill-label').textContent = `EOD: ${h12}:${pad(eodMin)} ${ampm}`;
+  }
+  function openEodSettings() {
+    document.getElementById('settings-time').value = `${pad(eodHour)}:${pad(eodMin)}`;
+    document.getElementById('settings-modal').classList.add('visible');
+  }
+  function closeSettings() { document.getElementById('settings-modal').classList.remove('visible'); }
+  function saveSettings() {
+    [eodHour, eodMin] = document.getElementById('settings-time').value.split(':').map(Number);
+    eodSnoozed = false; updateEodPill(); closeSettings();
+  }
+  function showEodModal() { updateStats(); document.getElementById('eod-modal').classList.add('visible'); }
+  function dismissEod() { eodDismissedDate=new Date().toDateString(); document.getElementById('eod-modal').classList.remove('visible'); }
+  function snoozeEod() {
+    eodSnoozed=true; document.getElementById('eod-modal').classList.remove('visible');
+    setTimeout(()=>{ eodSnoozed=false; showEodModal(); }, 30*60*1000);
+  }
+  async function eodExportAndEmail() {
+    const email   = document.getElementById('eod-email').value.trim();
+    const entries = (window._getTodayEntries ? window._getTodayEntries() : []).filter(e=>!e.removed);
+    if (!entries.length) { alert('No entries today to export.'); return; }
+    const cols = ['Name','Organisation','Phone','Meeting with','Purpose of Visit','Notes','Date','Sign-in Time','Sign-out Time','Status'];
+    const rows = entries.map(e =>
+      [e.name,e.org,e.phone,e.host,e.purpose,e.notes,e.date,e.time,e.signOutTime||'',e.status==='in'?'On site':'Signed out']
+      .map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')
+    );
+    const blob = new Blob([[cols.join(','),...rows].join('\n')], {type:'text/csv'});
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: 'venue-register-'+new Date().toISOString().slice(0,10)+'.csv'
+    });
+    a.click(); URL.revokeObjectURL(a.href);
+    if (email) {
+      const sub  = encodeURIComponent(`Venue Register — ${dateStr(new Date())}`);
+      const body = encodeURIComponent(`Hi,\n\nPlease find today's visitor register attached (${entries.length} entries).\n\nSign-in app`);
+      window.location.href = `mailto:${email}?subject=${sub}&body=${body}`;
+    }
+    dismissEod();
+  }
+
+  setInterval(() => {
+    const now = new Date();
+    if (now.getHours()===eodHour && now.getMinutes()===eodMin && !eodSnoozed && now.toDateString()!==eodDismissedDate)
+      showEodModal();
+  }, 60000);
+
+  updateEodPill();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Venue Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --bg-primary:       #ffffff;
+      --bg-secondary:     #f2f6f6;
+      --bg-tertiary:      #e8efef;
+      --bg-danger:        #fff1f1;
+      --border-secondary: #cddada;
+      --border-tertiary:  #d8e5e5;
+      --text-primary:     #162222;
+      --text-secondary:   #4d6b6b;
+      --text-danger:      #c0392b;
+      --accent:           #3d7a6e;
+      --accent-light:     #52a595;
+      --accent-dark:      #243535;
+      --accent-bg:        #e4f0ee;
+      --accent-tab-bg:    #cde3df;
+      --header-bg:        #243535;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-wrap { position: relative; min-height: 100vh; }
+    .app      { min-height: 100vh; background: var(--bg-tertiary); }
+
+    /* ── Header ── */
+    .header {
+      background: var(--header-bg);
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .venue-avatar {
+      width: 42px; height: 42px; border-radius: 10px;
+      overflow: hidden; flex-shrink: 0;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+    }
+    .venue-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .header-title { color: #fff; font-size: 18px; font-weight: 500; letter-spacing: 0.01em; }
+    .header-sub   { color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 2px; }
+    .header-right { display: flex; gap: 10px; flex-shrink: 0; align-items: center; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 16px; border-radius: 8px; font-size: 14px;
+      font-weight: 500; cursor: pointer; border: none;
+      font-family: var(--font-sans); transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-ghost     { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-secondary { background: var(--bg-primary); border: 0.5px solid var(--border-secondary); color: var(--text-primary); }
+    .btn-teal      { background: var(--accent); color: #fff; }
+    .btn-amber     { background: #b45309; color: #fff; }
+    .btn-danger-soft {
+      background: transparent; border: 0.5px solid var(--border-tertiary);
+      color: var(--text-danger); padding: 7px 12px; border-radius: 6px;
+      font-size: 13px; cursor: pointer; font-family: var(--font-sans);
+      transition: background 0.15s;
+    }
+    .btn-danger-soft:hover { background: var(--bg-danger); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; background: var(--bg-primary);
+      border-bottom: 0.5px solid var(--border-tertiary); padding: 0 32px;
+    }
+    .tab {
+      padding: 14px 20px; font-size: 14px; font-weight: 500;
+      color: var(--text-secondary); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+      transition: color 0.15s; user-select: none;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--bg-secondary); color: var(--text-secondary);
+      border-radius: 10px; font-size: 11px; padding: 1px 7px; margin-left: 6px;
+    }
+    .tab.active .tab-count { background: var(--accent-tab-bg); color: var(--accent-dark); }
+
+    /* ── Content / panels ── */
     .content { padding: 28px 32px; }
     .panel { display: none; }
     .panel.active { display: block; }
