@@ -384,6 +384,10 @@
         <span class="fb-dot" id="fb-dot"></span>
         <span id="fb-label">Connecting…</span>
       </div>
+      <button class="btn btn-ghost" onclick="openEodSettings()" title="Set end-of-day reminder time">
+        <i class="ti ti-clock" aria-hidden="true"></i>
+        <span id="eod-pill-label">EOD: 11:00 pm</span>
+      </button>
       <button class="btn btn-ghost" onclick="promptExportCSV()">
         <i class="ti ti-download" aria-hidden="true"></i> Export CSV
       </button>
@@ -435,7 +439,7 @@
         <div class="form-grid">
           <div class="field">
             <label>Full name</label>
-            <input type="text" id="f-name" placeholder="e.g. Jordan Clarke" autocomplete="off" />
+            <input type="text" id="f-name" placeholder="e.g. Dizzy Gillespie" autocomplete="off" autocapitalize="words" oninput="this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" />
           </div>
           <div class="field">
             <label>Organisation</label>
@@ -451,16 +455,16 @@
               <select id="f-host">
                 <option value="">Select host...</option>
                 <option>Gavin Sharp</option>
-                <option>John Shepherd</option>
+                <option>John Shephard</option>
                 <option>Santana Guérout</option>
                 <option>Laura Burgess</option>
                 <option>Debbie Ashton</option>
-                <option>Ellie Wilson</option>
-                <option>Connor McGarry</option>
                 <option>Alice McIllwraith</option>
                 <option>Andy Adams</option>
-                <option>Angus McBryde</option>
+                <option>Connor McGarry</option>
+                <option>Ellie Wilson</option>
                 <option>Leaharen Russo</option>
+                <option>Angus McBryde</option>
                 <option>Alex Berry</option>
                 <option>Belle Coleman</option>
                 <option>Other</option>
@@ -514,14 +518,6 @@
           </button>
         </div>
         <div id="onsite-list"></div>
-      </div>
-
-      <!-- Screen E: Goodbye confirmation -->
-      <div id="screen-goodbye" style="display:none" class="welcome-screen">
-        <div class="welcome-icon" style="background:#fff1f1"><i class="ti ti-door-exit" aria-hidden="true" style="color:#c0392b"></i></div>
-        <div class="welcome-title">See you again soon</div>
-        <div class="welcome-name" id="goodbye-name"></div>
-        <div class="welcome-sub">You've been signed out. Thanks for visiting Band on the Wall.</div>
       </div>
 
     </div>
@@ -617,10 +613,8 @@
 <!-- ── Firebase SDK ── -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, onSnapshot, getDocs }
+  import { getFirestore, collection, addDoc, updateDoc, doc, query, where, orderBy, onSnapshot, getDocs }
     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-  import { getAuth, signInAnonymously }
-    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
   // ─────────────────────────────────────────────
   // 🔧 PASTE YOUR FIREBASE CONFIG HERE
@@ -635,65 +629,49 @@ const firebaseConfig = {
 };
   // ─────────────────────────────────────────────
 
-  // todayKey duplicated here so the module is fully self-contained
-  // (ES modules run after regular scripts so we cannot call window functions
-  //  at module top-level without risking a ReferenceError that silently
-  //  aborts the entire try block before onSnapshot is ever registered)
-  function moduleTodayKey() {
+  let todayEntries = [];
+
+  function todayKey() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  let todayEntries = [];
+  try {
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    setFbStatus('connected', 'Live');
 
-  // Use a small init function called via window.addEventListener('load')
-  // so that all regular-script functions (setFbStatus, updateStats, etc.)
-  // are guaranteed to exist before we touch them.
-  window.addEventListener('load', async () => {
-    try {
-      const app = initializeApp(firebaseConfig);
-      const db  = getFirestore(app);
+    const todayQ = query(
+      collection(db, 'entries'),
+      where('dateKey', '==', todayKey()),
+      orderBy('timestamp', 'desc')
+    );
 
-      // Sign in anonymously — required by Firestore security rules
-      const auth = getAuth(app);
-      await signInAnonymously(auth);
+    onSnapshot(todayQ, snap => {
+      todayEntries = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+      document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
+      updateStats();
+      renderTable();
+      renderOnsiteList();
+    }, err => {
+      console.error(err);
+      setFbStatus('error', 'Error');
+    });
 
-      // Expose write helpers immediately after db is ready
-      window._getTodayEntries = () => todayEntries;
-      window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
-      window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
-      window._getAllEntries = async () => {
-        const snap = await getDocs(collection(db, 'entries'));
-        return snap.docs
-          .map(d => ({ firestoreId: d.id, ...d.data() }))
-          .sort((a, b) => b.timestamp - a.timestamp);
-      };
+    window._db           = () => db;
+    window._todayKey     = todayKey;
+    window._getTodayEntries = () => todayEntries;
+    window._getAllEntries = async () => {
+      const snap = await getDocs(query(collection(db, 'entries'), orderBy('timestamp', 'desc')));
+      return snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+    };
+    window._addEntry    = entry => addDoc(collection(db, 'entries'), entry);
+    window._updateEntry = (id, data) => updateDoc(doc(db, 'entries', id), data);
 
-      // Single-field where() — no composite index needed
-      const todayQ = query(
-        collection(db, 'entries'),
-        where('dateKey', '==', moduleTodayKey())
-      );
-
-      onSnapshot(todayQ, snap => {
-        todayEntries = snap.docs
-          .map(d => ({ firestoreId: d.id, ...d.data() }))
-          .sort((a, b) => b.timestamp - a.timestamp);
-        document.getElementById('reg-count').textContent = todayEntries.filter(e => !e.removed).length;
-        updateStats();
-        renderTable();
-        renderOnsiteList();
-        setFbStatus('connected', 'Live');
-      }, err => {
-        console.error('Firestore listener error:', err);
-        setFbStatus('error', 'Error — check console');
-      });
-
-    } catch(e) {
-      console.error('Firebase init failed:', e);
-      setFbStatus('error', 'Offline');
-    }
-  });
+  } catch(e) {
+    console.error('Firebase init failed:', e);
+    setFbStatus('error', 'Offline');
+  }
 </script>
 
 <script>
@@ -701,11 +679,6 @@ const firebaseConfig = {
   function nowStr() { const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); }
   function dateStr(d) {
     return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();
-  }
-  // todayKey lives here (plain JS, no Firebase needed) so it's always available
-  function todayKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
   function setFbStatus(state, label) {
@@ -731,7 +704,7 @@ const firebaseConfig = {
   }
 
   // ── Screen switching within visitor tab ──
-  const SCREENS = ['landing','signin','welcome','signout','goodbye'];
+  const SCREENS = ['landing','signin','welcome','signout'];
   function showScreen(name) {
     SCREENS.forEach(s => {
       document.getElementById('screen-'+s).style.display = s === name ? '' : 'none';
@@ -771,24 +744,24 @@ const firebaseConfig = {
     const entry = {
       name, org, phone, host, purpose, notes,
       time: nowStr(), date: dateStr(new Date()),
-      dateKey: todayKey(),
+      dateKey: window._todayKey ? window._todayKey() : '',
       timestamp: Date.now(), status: 'in'
     };
 
-    // Clear form immediately
+    if (window._addEntry) {
+      try { await window._addEntry(entry); }
+      catch(e) { console.error(e); alert('Could not save to database.'); return; }
+    }
+
+    // Show welcome screen
+    document.getElementById('welcome-name').textContent = name;
+    showScreen('welcome');
+
+    // Clear form
     ['f-name','f-org','f-phone','f-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('f-host').value = '';
     document.querySelectorAll('.visit-chip').forEach(c => c.classList.remove('selected'));
     visitChoice = '';
-
-    // Show welcome screen right away — don't wait for Firebase
-    document.getElementById('welcome-name').textContent = name;
-    showScreen('welcome');
-
-    // Save to Firebase in the background
-    if (window._addEntry) {
-      window._addEntry(entry).catch(e => console.error('Firebase write failed:', e));
-    }
 
     // Return to landing after 3 seconds
     setTimeout(() => showScreen('landing'), 3000);
@@ -796,18 +769,15 @@ const firebaseConfig = {
 
   // ── Sign out from onsite list ──
   async function signOutPerson(firestoreId, name) {
-    // Show goodbye confirmation immediately — don't wait for Firebase
-    document.getElementById('goodbye-name').textContent = name;
-    showScreen('goodbye');
-
-    // Write to Firebase in the background
-    if (window._updateEntry) {
-      window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() })
-        .catch(e => console.error('Firebase sign-out write failed:', e));
-    }
-
-    // Return to landing after 3 seconds
-    setTimeout(() => showScreen('landing'), 3000);
+    if (!window._updateEntry) return;
+    try {
+      await window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() });
+      showToast(name + ' signed out', true);
+      // If nobody left on site, go back to landing
+      const stillIn = (window._getTodayEntries ? window._getTodayEntries() : [])
+        .filter(e => !e.removed && e.status === 'in' && e.firestoreId !== firestoreId);
+      if (stillIn.length === 0) setTimeout(() => showScreen('landing'), 1200);
+    } catch(e) { console.error(e); }
   }
 
   // ── Render the on-site list (sign-out screen) ──
