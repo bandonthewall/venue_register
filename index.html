@@ -450,19 +450,14 @@
             <div class="select-wrap">
               <select id="f-host">
                 <option value="">Select host...</option>
-                <option>Gavin Sharp</option>
-                <option>John Shephard</option>
-                <option>Santana Guérout</option>
-                <option>Laura Burgess</option>
-                <option>Debbie Ashton</option>
-                <option>Alice McIllwraith</option>
-                <option>Connor McGarry</option>
-                <option>Ellie Wilson</option>
-                <option>Andy Adams</option>
-                <option>Angus McBryde</option>
-                <option>Leaharen Russo</option>
-                <option>Belle Coleman</option>
-                <option>Alex Berry</option>
+                <option>Box Office</option>
+                <option>Event Management</option>
+                <option>Marketing &amp; Promotions</option>
+                <option>Technical / Production</option>
+                <option>Artist / Backstage</option>
+                <option>Bar &amp; Hospitality</option>
+                <option>Security</option>
+                <option>General Management</option>
               </select>
               <i class="ti ti-chevron-down" aria-hidden="true"></i>
             </div>
@@ -618,18 +613,20 @@
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
   import { getFirestore, collection, addDoc, updateDoc, doc, query, where, onSnapshot, getDocs }
     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, signInAnonymously }
+    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
   // ─────────────────────────────────────────────
   // 🔧 PASTE YOUR FIREBASE CONFIG HERE
   // ─────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey:            "AIzaSyD0aiCKidXI5gGbz-vXYk3u5zHKrvvjfFk",
-  authDomain:        "visitor-register-9c389.firebaseapp.com",
-  projectId:         "visitor-register-9c389",
-  storageBucket:     "visitor-register-9c389.firebasestorage.app",
-  messagingSenderId: "436872681141",
-  appId:             "1:436872681141:web:6bd99e3d7b9d52214dd0fc"
-};
+  const firebaseConfig = {
+    apiKey:            "YOUR_API_KEY",
+    authDomain:        "YOUR_PROJECT.firebaseapp.com",
+    projectId:         "YOUR_PROJECT_ID",
+    storageBucket:     "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:             "YOUR_APP_ID"
+  };
   // ─────────────────────────────────────────────
 
   // todayKey duplicated here so the module is fully self-contained
@@ -650,6 +647,10 @@ const firebaseConfig = {
     try {
       const app = initializeApp(firebaseConfig);
       const db  = getFirestore(app);
+
+      // Sign in anonymously — required by Firestore security rules
+      const auth = getAuth(app);
+      await signInAnonymously(auth);
 
       // Expose write helpers immediately after db is ready
       window._getTodayEntries = () => todayEntries;
