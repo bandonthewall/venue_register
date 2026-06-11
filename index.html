@@ -781,11 +781,8 @@
     if (!window._updateEntry) return;
     try {
       await window._updateEntry(firestoreId, { status: 'out', signOutTime: nowStr() });
-      showToast(name + ' signed out', true);
-      // If nobody left on site, go back to landing
-      const stillIn = (window._getTodayEntries ? window._getTodayEntries() : [])
-        .filter(e => !e.removed && e.status === 'in' && e.firestoreId !== firestoreId);
-      if (stillIn.length === 0) setTimeout(() => showScreen('landing'), 1200);
+      showToast('Goodbye ' + name + ', see you next time!', true);
+      setTimeout(() => showScreen('landing'), 3000);
     } catch(e) { console.error(e); }
   }
 
